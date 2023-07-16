@@ -1,12 +1,17 @@
 "use client";
 
+import axios from "axios";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/input/Input";
 import { useCallback, useEffect, useState } from "react";
 import { FieldValues, useForm, SubmitHandler } from "react-hook-form";
-import { BsGithub, BsGoogle } from "react-icons/bs";
+import { BsGithub } from "react-icons/bs";
+import { FcGoogle } from "react-icons/fc";
+import { toast } from "react-hot-toast";
+import { signIn } from "next-auth/react";
 
 import AuthSocialButton from "../AuthSocialButton";
+
 type Variant = "LOGIN" | "REGISTER";
 const AuthForm = () => {
   const [variant, setVariant] = useState<Variant>("LOGIN");
@@ -35,16 +40,36 @@ const AuthForm = () => {
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
     setIsLoading(true);
     if (variant === "REGISTER") {
-      //Axios Register
+      axios
+        .post("/api/register", data)
+        .catch(() => {
+          toast.error("Something went wrong!");
+        })
+        .finally(() => setIsLoading(false));
     }
     if (variant === "LOGIN") {
-      //NextAuth SignIn
+      signIn("credentials", {
+        ...data,
+        redirect: false,
+      })
+        .then((callback) => {
+          if (callback?.error) toast.error("Invalid credentials");
+          if (callback?.ok && !callback?.error) toast.success("Logged In!");
+        })
+        .finally(() => setIsLoading(false));
     }
   };
 
   const socialAction = (action: string) => {
     setIsLoading(true);
-    //NextAuth Social signIn
+    signIn(action, {
+      redirect: false,
+    })
+      .then((callback) => {
+        if (callback?.error) toast.error("Invalid credentials");
+        if (callback?.ok && !callback?.error) toast.success("Logged In !");
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -112,7 +137,7 @@ const AuthForm = () => {
               onClick={() => socialAction("github")}
             />
             <AuthSocialButton
-              icon={BsGoogle}
+              icon={FcGoogle}
               onClick={() => socialAction("google")}
             />
           </div>
