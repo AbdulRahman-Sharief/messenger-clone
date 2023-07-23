@@ -19,8 +19,8 @@ export default function Home() {
         <Image
           src="/images/logopurple.png"
           alt="logo"
-          height={48}
-          width={48}
+          height={68}
+          width={68}
           className="mx-auto w-auto"
         />
         <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
